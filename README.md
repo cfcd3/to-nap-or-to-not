@@ -6,7 +6,7 @@ A short quiz that asks you 6 deeply important questions about your current level
 
 ## Live Demo
 
-Just open `index.html` in any browser — on your phone, laptop, or the screen you're currently struggling to focus on.
+Just open `quiz.html` in any browser — on your phone, laptop, or the screen you're currently struggling to focus on.
 
 ## Features
 
@@ -21,7 +21,7 @@ Just open `index.html` in any browser — on your phone, laptop, or the screen y
 ```bash
 git clone https://github.com/cfcd3/should-i-nap.git
 cd should-i-nap
-open index.html   # or just double-click it
+open quiz.html   # or just double-click it
 ```
 
 That's it. It's one HTML file.
