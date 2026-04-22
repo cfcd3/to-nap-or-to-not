@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Should I Nap?</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Instrument+Sans:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#0e0c0a;
+  --surface:#161410;
+  --card:#1c1915;
+  --border:#2e2a24;
+  --border-hi:#4a4035;
+  --ink:#f0ebe2;
+  --muted:#7a7060;
+  --faint:#2a2620;
+  --accent:#c8a96e;
+  --accent-dim:#7a6540;
+  --red:#c25a4a;
+  --green:#5a8c5e;
+  --purple:#8a6a9a;
+  --serif:'Playfair Display',serif;
+  --sans:'Instrument Sans',sans-serif;
+}
+
+body{
+  font-family:var(--sans);
+  background:var(--bg);
+  color:var(--ink);
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:3rem 1.25rem 5rem;
+}
+
+.sigil{
+  font-size:11px;
+  letter-spacing:.2em;
+  text-transform:uppercase;
+  color:var(--faint);
+  margin-bottom:2.5rem;
+  text-align:center;
+}
+.sigil::before,.sigil::after{content:'— '}
+
+.header{text-align:center;margin-bottom:2.75rem;max-width:440px}
+.eyebrow{
+  font-size:10px;
+  letter-spacing:.2em;
+  text-transform:uppercase;
+  color:var(--accent-dim);
+  margin-bottom:.75rem;
+}
+.header h1{
+  font-family:var(--serif);
+  font-size:clamp(2.2rem,9vw,3.4rem);
+  font-weight:700;
+  line-height:1.05;
+  color:var(--ink);
+}
+.header h1 em{font-style:italic;color:var(--accent)}
+.sub{
+  margin-top:.85rem;
+  font-size:12px;
+  color:var(--muted);
+  letter-spacing:.04em;
+  line-height:1.7;
+}
+
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:2.25rem 2rem;
+  width:100%;
+  max-width:500px;
+}
+
+.progress-wrap{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:2rem;
+}
+.progress-track{
+  flex:1;height:1px;
+  background:var(--faint);
+  border-radius:1px;
+  overflow:hidden;
+}
+.progress-fill{
+  height:100%;
+  background:var(--accent);
+  transition:width .5s cubic-bezier(.4,0,.2,1);
+}
+.prog-label{
+  font-size:11px;
+  color:var(--muted);
+  letter-spacing:.06em;
+  white-space:nowrap;
+}
+
+.q-text{
+  font-family:var(--serif);
+  font-size:clamp(1.15rem,4vw,1.45rem);
+  font-weight:500;
+  line-height:1.45;
+  color:var(--ink);
+  margin-bottom:1.75rem;
+}
+
+.options{display:flex;flex-direction:column;gap:8px}
+
+.opt{
+  background:transparent;
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:.9rem 1.1rem;
+  font-family:var(--sans);
+  font-size:13.5px;
+  color:var(--muted);
+  text-align:left;
+  cursor:pointer;
+  transition:border-color .15s,background .15s,color .15s,transform .1s;
+  line-height:1.5;
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+}
+.opt:hover{
+  border-color:var(--accent-dim);
+  background:rgba(200,169,110,.05);
+  color:var(--ink);
+  transform:translateX(4px);
+}
+.opt:active{transform:translateX(2px) scale(.99)}
+.opt.picked{border-color:var(--accent);background:rgba(200,169,110,.07);color:var(--ink)}
+.opt:disabled{cursor:default}
+
+.dot{
+  width:5px;height:5px;
+  border-radius:50%;
+  border:1px solid var(--accent-dim);
+  flex-shrink:0;
+  margin-top:6px;
+  transition:background .15s,border-color .15s;
+}
+.opt:hover .dot,.opt.picked .dot{background:var(--accent);border-color:var(--accent)}
+
+.verdict-wrap{
+  display:none;
+  text-align:center;
+  animation:rise .55s cubic-bezier(.2,.8,.3,1) forwards;
+}
+@keyframes rise{
+  from{opacity:0;transform:translateY(20px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+.v-icon-ring{
+  width:64px;height:64px;
+  border-radius:50%;
+  border:1px solid var(--border-hi);
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 1.5rem;
+  font-size:22px;
+  animation:popIn .6s cubic-bezier(.2,.8,.3,1) .15s both;
+}
+@keyframes popIn{
+  from{transform:scale(0);opacity:0}
+  55%{transform:scale(1.18)}
+  to{transform:scale(1);opacity:1}
+}
+
+.v-eyebrow{
+  font-size:10px;
+  letter-spacing:.2em;
+  text-transform:uppercase;
+  color:var(--muted);
+  margin-bottom:.5rem;
+}
+.v-title{
+  font-family:var(--serif);
+  font-size:clamp(1.8rem,7vw,2.6rem);
+  font-weight:700;
+  line-height:1.1;
+  margin-bottom:1.25rem;
+}
+.v-title.nope{color:var(--green)}
+.v-title.idk{color:var(--accent)}
+.v-title.yes{color:var(--red)}
+.v-title.gone{color:var(--purple)}
+
+.rule{
+  width:28px;height:1px;
+  background:var(--border-hi);
+  margin:0 auto 1.25rem;
+}
+
+.v-reason{
+  font-size:13.5px;
+  color:var(--muted);
+  line-height:1.8;
+  max-width:360px;
+  margin:0 auto 2rem;
+}
+
+.score-section{margin-bottom:2rem}
+.score-meta{
+  display:flex;
+  justify-content:space-between;
+  font-size:11px;
+  color:var(--muted);
+  letter-spacing:.06em;
+  margin-bottom:.6rem;
+  text-transform:uppercase;
+}
+.score-track{
+  height:4px;
+  background:var(--faint);
+  border-radius:2px;
+  overflow:hidden;
+}
+.score-fill{
+  height:100%;
+  border-radius:2px;
+  transition:width 1.2s cubic-bezier(.4,0,.2,1) .5s;
+}
+.score-fill.nope{background:var(--green)}
+.score-fill.idk{background:var(--accent)}
+.score-fill.yes{background:var(--red)}
+.score-fill.gone{background:var(--purple)}
+
+.restart{
+  background:transparent;
+  border:1px solid var(--border-hi);
+  border-radius:10px;
+  padding:.8rem 1.75rem;
+  font-family:var(--sans);
+  font-size:12.5px;
+  color:var(--muted);
+  cursor:pointer;
+  letter-spacing:.04em;
+  transition:border-color .15s,color .15s,background .15s;
+}
+.restart:hover{border-color:var(--accent);color:var(--ink);background:rgba(200,169,110,.05)}
+
+.footer{
+  margin-top:2.5rem;
+  font-size:10px;
+  color:var(--faint);
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  text-align:center;
+}
+</style>
+</head>
+<body>
+
+<div class="sigil">memento dormire</div>
+
+<div class="header">
+  <div class="eyebrow">a clinical assessment</div>
+  <h1>Should I Take<br>a <em>Nap?</em></h1>
+  <p class="sub">6 questions. ruthlessly evaluated.<br>you may not like what you find.</p>
+</div>
+
+<div class="card" id="quiz">
+  <div class="progress-wrap">
+    <div class="progress-track"><div class="progress-fill" id="prog" style="width:0%"></div></div>
+    <div class="prog-label" id="prog-label">1 / 6</div>
+  </div>
+  <div class="q-text" id="qtext"></div>
+  <div class="options" id="opts"></div>
+</div>
+
+<div class="card verdict-wrap" id="verdict">
+  <div class="v-icon-ring" id="v-icon"></div>
+  <div class="v-eyebrow">your diagnosis</div>
+  <div class="v-title" id="v-title"></div>
+  <div class="rule"></div>
+  <p class="v-reason" id="v-reason"></p>
+  <div class="score-section">
+    <div class="score-meta">
+      <span>mortality score</span>
+      <span id="v-pct">0%</span>
+    </div>
+    <div class="score-track"><div class="score-fill" id="v-bar" style="width:0%"></div></div>
+  </div>
+  <button class="restart" onclick="restart()">take it again &nbsp;(you won't do better)</button>
+</div>
+
+<div class="footer">no medical professionals were consulted</div>
+
+<script>
+const Qs=[
+  {
+    t:"How many times have you reread the same sentence today?",
+    opts:[
+      {l:"Zero. I am cognitively intact.",s:0},
+      {l:"Twice. Totally survivable.",s:1},
+      {l:"Four times. Still can't parse it.",s:2},
+      {l:"I have forgotten the concept of sentences.",s:3},
+    ]
+  },
+  {
+    t:"When did you last blink intentionally?",
+    opts:[
+      {l:"Just now. I am completely fine.",s:0},
+      {l:"A few minutes ago, probably.",s:1},
+      {l:"My eyes have become purely decorative.",s:2},
+      {l:"I have transcended blinking.",s:3},
+    ]
+  },
+  {
+    t:"Someone said your name. What happened?",
+    opts:[
+      {l:"I responded. Like a person.",s:0},
+      {l:"There was a delay but I recovered.",s:1},
+      {l:"My body registered it. I chose not to act.",s:2},
+      {l:"I heard it in a dream I was already having.",s:3},
+    ]
+  },
+  {
+    t:"Describe your relationship with gravity right now.",
+    opts:[
+      {l:"Mutual respect. I remain upright willingly.",s:0},
+      {l:"It's pulling harder than usual today.",s:1},
+      {l:"Every flat surface looks like a bed.",s:2},
+      {l:"I have already made peace with the floor.",s:3},
+    ]
+  },
+  {
+    t:"What is the coffee doing?",
+    opts:[
+      {l:"Working exactly as intended.",s:0},
+      {l:"Holding the line. Barely.",s:1},
+      {l:"Laughing at me from inside the mug.",s:2},
+      {l:"I am the coffee now. It didn't help.",s:3},
+    ]
+  },
+  {
+    t:"What are you actually doing right now?",
+    opts:[
+      {l:"Being productive. I don't need this quiz.",s:0},
+      {l:"A small break before returning to productivity.",s:1},
+      {l:"Procrastinating via nap assessment tool.",s:2},
+      {l:"This quiz is the most I've accomplished today.",s:3},
+    ]
+  }
+];
+
+const Vs=[
+  {
+    range:[0,4],type:'nope',
+    icon:'◇',
+    title:'You\'re Fine',
+    reason:'You do not need a nap. You need to go be annoyingly productive somewhere else. Some of us are suffering and your wellness is unsettling.'
+  },
+  {
+    range:[5,9],type:'idk',
+    icon:'◈',
+    title:'Nap Curious',
+    reason:'You\'re not dying. You\'re not thriving. You exist in the liminal void between consciousness and absence. A 20-minute nap might save you, or you\'ll wake up at 7pm convinced it\'s tomorrow.'
+  },
+  {
+    range:[10,14],type:'yes',
+    icon:'◉',
+    title:'Nap. Now.',
+    reason:'Your body filed a formal complaint three hours ago. The verdict was delivered. You ignored it. Close whatever tab you have open that isn\'t this one. The emails will still be terrible when you wake up.'
+  },
+  {
+    range:[15,18],type:'gone',
+    icon:'●',
+    title:'You\'re Already Gone',
+    reason:'You completed a six-question quiz while running entirely on fumes and delusion. Impressive. Tragic. The pillow has been waiting. It does not judge. It never did. Go.'
+  },
+];
+
+let cur=0,score=0;
+
+function render(){
+  const q=Qs[cur];
+  document.getElementById('qtext').textContent=q.t;
+  document.getElementById('prog').style.width=`${(cur/Qs.length)*100}%`;
+  document.getElementById('prog-label').textContent=`${cur+1} / ${Qs.length}`;
+  const el=document.getElementById('opts');
+  el.innerHTML='';
+  q.opts.forEach(o=>{
+    const b=document.createElement('button');
+    b.className='opt';
+    b.innerHTML=`<span class="dot"></span><span>${o.l}</span>`;
+    b.onclick=()=>pick(o.s,b);
+    el.appendChild(b);
+  });
+}
+
+function pick(s,btn){
+  document.querySelectorAll('.opt').forEach(b=>b.disabled=true);
+  btn.classList.add('picked');
+  score+=s;
+  setTimeout(()=>{
+    cur++;
+    cur<Qs.length?render():showVerdict();
+  },380);
+}
+
+function showVerdict(){
+  document.getElementById('quiz').style.display='none';
+  const vc=document.getElementById('verdict');
+  vc.style.display='block';
+  const v=Vs.find(v=>score>=v.range[0]&&score<=v.range[1])||Vs[Vs.length-1];
+  const pct=Math.round((score/18)*100);
+  document.getElementById('v-icon').textContent=v.icon;
+  document.getElementById('v-title').textContent=v.title;
+  document.getElementById('v-title').className='v-title '+v.type;
+  document.getElementById('v-reason').textContent=v.reason;
+  document.getElementById('v-pct').textContent=pct+'%';
+  const bar=document.getElementById('v-bar');
+  bar.className='score-fill '+v.type;
+  setTimeout(()=>{bar.style.width=pct+'%'},100);
+}
+
+function restart(){
+  cur=0;score=0;
+  document.getElementById('verdict').style.display='none';
+  document.getElementById('quiz').style.display='block';
+  document.getElementById('v-bar').style.width='0%';
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
